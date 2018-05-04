@@ -124,18 +124,20 @@ func (e *Encoding) EncodeBigInt(n *big.Int) string {
  */
 
 // DecodeToInt64 decodes a base62 encoded string using the StdEncoding
-func DecodeToInt64(s string) int64 {
+func DecodeToInt64(s string) (int64, error) {
 	return StdEncoding.DecodeToInt64(s)
 }
 
 // DecodeToBigInt returns an arbitrary precision integer from the base62
 // encoded string using the StdEncoding
-func DecodeToBigInt(s string) *big.Int {
+func DecodeToBigInt(s string) (*big.Int, error) {
 	return StdEncoding.DecodeToBigInt(s)
 }
 
+type ErrInvalidCharacter struct{ error }
+
 // DecodeToInt64 decodes a base62 encoded string
-func (e *Encoding) DecodeToInt64(s string) int64 {
+func (e *Encoding) DecodeToInt64(s string) (int64, error) {
 	var (
 		n     int64
 		c     int64
@@ -145,7 +147,9 @@ func (e *Encoding) DecodeToInt64(s string) int64 {
 
 	for i, v := range s {
 		idx = strings.IndexRune(e.encode, v)
-
+		if idx == -1 {
+			return 0, ErrInvalidCharacter{fmt.Errorf("Invalid character %c at %d", v, i)}
+		}
 		// Work downwards through powers of our base
 		power = len(s) - (i + 1)
 
@@ -154,11 +158,11 @@ func (e *Encoding) DecodeToInt64(s string) int64 {
 		n = n + c
 	}
 
-	return int64(n)
+	return int64(n), nil
 }
 
 // DecodeToBigInt returns an arbitrary precision integer from the base62 encoded string
-func (e *Encoding) DecodeToBigInt(s string) *big.Int {
+func (e *Encoding) DecodeToBigInt(s string) (*big.Int, error) {
 	var (
 		n = new(big.Int)
 
@@ -172,8 +176,13 @@ func (e *Encoding) DecodeToBigInt(s string) *big.Int {
 
 	// Run through each character to decode
 	for i, v := range s {
+		pos := strings.IndexRune(e.encode, v)
+		if pos == -1 {
+			return nil, ErrInvalidCharacter{fmt.Errorf("Invalid character %c at %d",
+				v, i)}
+		}
 		// Get index/position of the rune as a big int
-		idx.SetInt64(int64(strings.IndexRune(e.encode, v)))
+		idx.SetInt64(int64(pos))
 
 		// Work downwards through exponents
 		exp.SetInt64(int64(len(s) - (i + 1)))
@@ -188,7 +197,7 @@ func (e *Encoding) DecodeToBigInt(s string) *big.Int {
 		n.Add(n, c)
 	}
 
-	return n
+	return n, nil
 }
 
 // pad a string to a minimum length with zero characters

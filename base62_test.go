@@ -40,7 +40,10 @@ func TestEncodeInt64(t *testing.T) {
 
 func TestDecodeToInt64(t *testing.T) {
 	for _, tc := range testcases {
-		v := DecodeToInt64(tc.encoded)
+		v, err := DecodeToInt64(tc.encoded)
+		if err != nil {
+			t.Fatal(err)
+		}
 		t.Logf("Decoded %s to %v", tc.encoded, v)
 		assert.Equal(t, tc.num, v)
 	}
@@ -171,7 +174,10 @@ func BenchmarkEncodeBigIntVeryLong(b *testing.B) {
 
 func TestDecodeToBigInt(t *testing.T) {
 	for _, tc := range bigTestcases {
-		v := DecodeToBigInt(tc.encoded)
+		v, err := DecodeToBigInt(tc.encoded)
+		if err != nil {
+			t.Fatal(err)
+		}
 		t.Logf("Decoded %v to %s", tc.encoded, v.String())
 		assert.Equal(t, tc.num, v.String())
 	}
@@ -189,7 +195,10 @@ func TestPaddedDecodeToInt64(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		v := DecodeToInt64(tc.encoded)
+		v, err := DecodeToInt64(tc.encoded)
+		if err != nil {
+			t.Fatal(err)
+		}
 		t.Logf("Decoded %s to %v", tc.encoded, v)
 		assert.Equal(t, tc.result, v)
 	}
@@ -206,7 +215,10 @@ func TestPaddedDecodeToBigInt(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		v := DecodeToBigInt(tc.encoded)
+		v, err := DecodeToBigInt(tc.encoded)
+		if err != nil {
+			t.Fatal(err)
+		}
 		t.Logf("Decoded %s to %v", tc.encoded, v)
 		assert.Equal(t, tc.result, v.String())
 	}
