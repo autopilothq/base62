@@ -128,6 +128,12 @@ func DecodeToInt64(s string) (int64, error) {
 	return StdEncoding.DecodeToInt64(s)
 }
 
+// MustDecodeToInt64 decodes a base62 encoded string using the StdEncoding
+// panics in the case of an error
+func MustDecodeToInt64(s string) int64 {
+	return StdEncoding.MustDecodeToInt64(s)
+}
+
 // DecodeToBigInt returns an arbitrary precision integer from the base62
 // encoded string using the StdEncoding
 func DecodeToBigInt(s string) (*big.Int, error) {
@@ -135,6 +141,16 @@ func DecodeToBigInt(s string) (*big.Int, error) {
 }
 
 type ErrInvalidCharacter struct{ error }
+
+// MustDecodeToInt64 decodes a base62 encoded string,
+// it panics in the case of an error
+func (e *Encoding) MustDecodeToInt64(s string) int64 {
+	v, err := e.DecodeToInt64(s)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
 
 // DecodeToInt64 decodes a base62 encoded string
 func (e *Encoding) DecodeToInt64(s string) (int64, error) {
